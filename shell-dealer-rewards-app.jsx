@@ -1,0 +1,596 @@
+import React, { useState } from 'react';
+import { BarChart3, TrendingUp, Award, User, Home, ChevronRight } from 'lucide-react';
+
+const ShellDealerRewardsApp = () => {
+  const [currentPage, setCurrentPage] = useState('dashboard');
+  const [timeRange, setTimeRange] = useState('6months');
+  const [productFilter, setProductFilter] = useState('all');
+  
+  // Mock data
+  const userPoints = 12450;
+  const dealershipName = "Shell Dealership";
+  const accountId = "SD123456";
+  
+  const purchaseHistory = [
+    { date: '03/15/2025', description: 'Purchase - 500 Gallons Premium', points: 500, balance: 12450, isPremium: true },
+    { date: '03/10/2025', description: 'Reward Redemption - Jacket', points: -8000, balance: 11950, isPremium: false },
+    { date: '03/01/2025', description: 'Purchase - 300 Gallons Regular', points: 300, balance: 19950, isPremium: false },
+    { date: '02/20/2025', description: 'Purchase - 200 Gallons Diesel Extra', points: 200, balance: 19650, isPremium: true },
+    { date: '02/15/2025', description: 'Purchase - 400 Gallons Premium', points: 400, balance: 19450, isPremium: true },
+  ];
+  
+  const rewards = [
+    { id: 1, name: 'Shell Branded Jacket', points: 8000, available: true, category: 'apparel' },
+    { id: 2, name: 'Tool Set Professional', points: 12000, available: true, category: 'tools' },
+    { id: 3, name: 'Shell Cap', points: 2000, available: true, category: 'apparel' },
+    { id: 4, name: 'Gift Card $50', points: 5000, available: true, category: 'giftcards' },
+    { id: 5, name: 'Portable Air Compressor', points: 15000, available: false, category: 'equipment' },
+    { id: 6, name: 'Shell Umbrella', points: 3000, available: true, category: 'accessories' },
+    { id: 7, name: 'Hydraulic Jack', points: 18000, available: false, category: 'equipment' },
+    { id: 8, name: 'Gift Card $100', points: 10000, available: true, category: 'giftcards' },
+  ];
+  
+  const monthlyPerformance = [
+    { month: 'Sep', gallons: 180, premium: 60, diesel: 45, regular: 50, lubricants: 25 },
+    { month: 'Oct', gallons: 210, premium: 75, diesel: 55, regular: 55, lubricants: 25 },
+    { month: 'Nov', gallons: 240, premium: 90, diesel: 60, regular: 60, lubricants: 30 },
+    { month: 'Dec', gallons: 190, premium: 65, diesel: 50, regular: 50, lubricants: 25 },
+    { month: 'Jan', gallons: 220, premium: 80, diesel: 55, regular: 55, lubricants: 30 },
+    { month: 'Feb', gallons: 260, premium: 95, diesel: 65, regular: 65, lubricants: 35 },
+  ];
+
+  // Header Component
+  const Header = () => (
+    <header className="bg-white shadow-md sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex justify-between items-center py-4">
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-red-500 rounded-full mr-3"></div>
+            <h1 className="text-xl font-bold text-gray-800">Shell Dealer Rewards</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="bg-yellow-400 text-gray-800 px-4 py-2 rounded-full font-bold">
+              {userPoints.toLocaleString()} points
+            </div>
+            <div className="flex items-center">
+              <div className="w-9 h-9 bg-gray-400 rounded-full flex items-center justify-center text-white font-bold mr-2">
+                SD
+              </div>
+              <span className="text-sm hidden sm:inline">{dealershipName}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+
+  // Navigation Component
+  const Navigation = () => (
+    <nav className="bg-gray-800">
+      <div className="max-w-7xl mx-auto px-4">
+        <ul className="flex">
+          {[
+            { id: 'dashboard', label: 'Dashboard', icon: Home },
+            { id: 'performance', label: 'Performance', icon: TrendingUp },
+            { id: 'rewards', label: 'Rewards', icon: Award },
+            { id: 'account', label: 'Account', icon: User },
+          ].map(item => (
+            <li key={item.id}>
+              <button
+                onClick={() => setCurrentPage(item.id)}
+                className={`flex items-center gap-2 px-5 py-4 text-white transition-colors ${
+                  currentPage === item.id ? 'bg-red-600' : 'hover:bg-red-600'
+                }`}
+              >
+                <item.icon size={18} />
+                <span className="hidden sm:inline">{item.label}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+  );
+
+  // Dashboard Page
+  const DashboardPage = () => {
+    const maxGallons = Math.max(...monthlyPerformance.map(m => m.gallons));
+    const tierProgress = (userPoints / 15000) * 100;
+    
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-gray-800 border-b-2 border-yellow-400 pb-3">
+          Dashboard
+        </h2>
+        
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Purchase Summary */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Purchase Summary</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <div className="text-3xl font-bold text-red-600">846</div>
+                <div className="text-sm text-gray-600">Total Gallons</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <div className="text-3xl font-bold text-red-600">12,450</div>
+                <div className="text-sm text-gray-600">Points Earned</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <div className="text-3xl font-bold text-red-600">38%</div>
+                <div className="text-sm text-gray-600">Premium Products</div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 text-center">
+                <div className="text-3xl font-bold text-red-600">4,250</div>
+                <div className="text-sm text-gray-600">Points Redeemed</div>
+              </div>
+            </div>
+            
+            {/* Tier Progress */}
+            <div className="mt-6">
+              <h4 className="font-semibold mb-2 text-gray-800">Silver Tier Progress</h4>
+              <div className="bg-gray-300 rounded-full h-5 overflow-hidden">
+                <div 
+                  className="bg-red-600 h-full rounded-full transition-all duration-1000"
+                  style={{ width: `${Math.min(tierProgress, 100)}%` }}
+                ></div>
+              </div>
+              <div className="flex justify-between text-xs mt-2 text-gray-600">
+                <span>Silver (0)</span>
+                <span>Gold (15,000)</span>
+                <span>Platinum (25,000)</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Monthly Performance Chart */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">Monthly Performance</h3>
+            <div className="h-64 flex items-end justify-around gap-2">
+              {monthlyPerformance.map((month, idx) => (
+                <div key={idx} className="flex flex-col items-center flex-1">
+                  <div 
+                    className="w-full bg-red-600 rounded-t transition-all duration-500 hover:bg-red-700"
+                    style={{ height: `${(month.gallons / maxGallons) * 100}%` }}
+                  ></div>
+                  <div className="text-xs mt-2 text-gray-600">{month.month}</div>
+                </div>
+              ))}
+            </div>
+            <div className="text-center mt-4 text-sm text-gray-600">
+              Total Gallons by Month
+            </div>
+          </div>
+        </div>
+        
+        {/* Recent Purchases */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Recent Purchases</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-yellow-400">
+                  <th className="px-4 py-3 text-left text-gray-800">Date</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Description</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Points</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseHistory.slice(0, 5).map((item, idx) => (
+                  <tr key={idx} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="px-4 py-3 text-gray-700">{item.date}</td>
+                    <td className="px-4 py-3 text-gray-700">
+                      {item.description}
+                      {item.isPremium && (
+                        <span className="ml-2 bg-red-600 text-white text-xs px-2 py-1 rounded">
+                          Premium
+                        </span>
+                      )}
+                    </td>
+                    <td className={`px-4 py-3 font-semibold ${item.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {item.points > 0 ? '+' : ''}{item.points.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{item.balance.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Performance Page
+  const PerformancePage = () => {
+    const maxHeight = 300;
+    const products = [
+      { name: 'V-Power Premium', color: '#ED1C24', premium: true },
+      { name: 'Diesel Extra', color: '#FF6B6B', premium: true },
+      { name: 'Regular Unleaded', color: '#FFCC00', premium: false },
+      { name: 'Standard Diesel', color: '#FFE066', premium: false },
+      { name: 'Lubricants', color: '#88C0D0', premium: false },
+    ];
+    
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-gray-800 border-b-2 border-yellow-400 pb-3">
+          Performance
+        </h2>
+        
+        {/* Filters */}
+        <div className="flex gap-4 flex-wrap">
+          <select 
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded bg-white"
+          >
+            <option value="6months">Last 6 Months</option>
+            <option value="12months">Last 12 Months</option>
+            <option value="ytd">Year to Date</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          
+          <select 
+            value={productFilter}
+            onChange={(e) => setProductFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded bg-white"
+          >
+            <option value="all">All Products</option>
+            <option value="premium">Premium Products Only</option>
+            <option value="standard">Standard Products Only</option>
+          </select>
+        </div>
+        
+        {/* Volume Chart */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+            Monthly Volume by Product (Gallons)
+          </h3>
+          
+          {/* Legend */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            {products.map((product, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <div 
+                  className="w-4 h-4 rounded"
+                  style={{ backgroundColor: product.color }}
+                ></div>
+                <span className="text-sm text-gray-700">
+                  Shell {product.name}
+                  {product.premium && (
+                    <span className="ml-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded">
+                      Premium
+                    </span>
+                  )}
+                </span>
+              </div>
+            ))}
+          </div>
+          
+          {/* Stacked Bar Chart */}
+          <div className="relative h-80 border-l border-b border-gray-300 ml-12">
+            {/* Y-axis labels */}
+            <div className="absolute -left-12 top-0 h-full flex flex-col justify-between text-xs text-gray-600">
+              <span>300</span>
+              <span>225</span>
+              <span>150</span>
+              <span>75</span>
+              <span>0</span>
+            </div>
+            
+            {/* Grid lines */}
+            <div className="absolute inset-0 flex flex-col justify-between">
+              {[0, 1, 2, 3, 4].map(i => (
+                <div key={i} className="border-t border-gray-200"></div>
+              ))}
+            </div>
+            
+            {/* Bars */}
+            <div className="absolute inset-0 flex items-end justify-around px-4">
+              {monthlyPerformance.map((month, idx) => {
+                const total = month.premium + month.diesel + month.regular + month.lubricants;
+                return (
+                  <div key={idx} className="flex flex-col items-center w-12">
+                    <div className="w-full relative" style={{ height: `${(total / 300) * 100}%` }}>
+                      {/* Stacked segments */}
+                      <div 
+                        className="absolute bottom-0 w-full rounded-t"
+                        style={{ 
+                          height: `${(month.lubricants / total) * 100}%`,
+                          backgroundColor: '#88C0D0'
+                        }}
+                      ></div>
+                      <div 
+                        className="absolute w-full"
+                        style={{ 
+                          bottom: `${(month.lubricants / total) * 100}%`,
+                          height: `${(month.regular / total) * 100}%`,
+                          backgroundColor: '#FFE066'
+                        }}
+                      ></div>
+                      <div 
+                        className="absolute w-full"
+                        style={{ 
+                          bottom: `${((month.lubricants + month.regular) / total) * 100}%`,
+                          height: `${(month.diesel / total) * 100}%`,
+                          backgroundColor: '#FFCC00'
+                        }}
+                      ></div>
+                      <div 
+                        className="absolute w-full"
+                        style={{ 
+                          bottom: `${((month.lubricants + month.regular + month.diesel) / total) * 100}%`,
+                          height: `${(month.diesel / total) * 100}%`,
+                          backgroundColor: '#FF6B6B'
+                        }}
+                      ></div>
+                      <div 
+                        className="absolute w-full rounded-t"
+                        style={{ 
+                          bottom: `${((month.lubricants + month.regular + month.diesel * 2) / total) * 100}%`,
+                          height: `${(month.premium / total) * 100}%`,
+                          backgroundColor: '#ED1C24'
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-xs mt-2 text-gray-600">{month.month}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+        
+        {/* Performance Summary Table */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Performance Summary</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-yellow-400">
+                  <th className="px-4 py-3 text-left text-gray-800">Product</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Total Volume</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Points Earned</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Avg Monthly</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="bg-gray-50">
+                  <td className="px-4 py-3 text-gray-700">Shell V-Power Premium</td>
+                  <td className="px-4 py-3 text-gray-700">465 gal</td>
+                  <td className="px-4 py-3 text-gray-700 font-semibold">465 pts</td>
+                  <td className="px-4 py-3 text-gray-700">77.5 gal</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-gray-700">Shell Diesel Extra</td>
+                  <td className="px-4 py-3 text-gray-700">330 gal</td>
+                  <td className="px-4 py-3 text-gray-700 font-semibold">330 pts</td>
+                  <td className="px-4 py-3 text-gray-700">55 gal</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="px-4 py-3 text-gray-700">Shell Regular Unleaded</td>
+                  <td className="px-4 py-3 text-gray-700">335 gal</td>
+                  <td className="px-4 py-3 text-gray-700 font-semibold">335 pts</td>
+                  <td className="px-4 py-3 text-gray-700">55.8 gal</td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 text-gray-700">Shell Lubricants</td>
+                  <td className="px-4 py-3 text-gray-700">170 gal</td>
+                  <td className="px-4 py-3 text-gray-700 font-semibold">170 pts</td>
+                  <td className="px-4 py-3 text-gray-700">28.3 gal</td>
+                </tr>
+                <tr className="bg-gray-100 font-bold">
+                  <td className="px-4 py-3 text-gray-800">TOTAL</td>
+                  <td className="px-4 py-3 text-gray-800">1,300 gal</td>
+                  <td className="px-4 py-3 text-gray-800">1,300 pts</td>
+                  <td className="px-4 py-3 text-gray-800">216.7 gal</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Rewards Page
+  const RewardsPage = () => {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-gray-800 border-b-2 border-yellow-400 pb-3">
+          Rewards Catalog
+        </h2>
+        
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <p className="text-gray-700">
+            <strong>Your Points:</strong> {userPoints.toLocaleString()} points available
+          </p>
+        </div>
+        
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {rewards.map(reward => {
+            const canAfford = userPoints >= reward.points;
+            return (
+              <div 
+                key={reward.id}
+                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow"
+              >
+                <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                  <Award size={48} className="text-gray-500" />
+                </div>
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-800 mb-2">{reward.name}</h3>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-yellow-500 font-bold">⭐</span>
+                    <span className="font-bold text-gray-800">
+                      {reward.points.toLocaleString()} points
+                    </span>
+                  </div>
+                  <button
+                    disabled={!canAfford || !reward.available}
+                    className={`w-full py-2 px-4 rounded transition-colors ${
+                      canAfford && reward.available
+                        ? 'bg-red-600 hover:bg-red-700 text-white cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {!reward.available ? 'Out of Stock' : canAfford ? 'Redeem' : 'Not Enough Points'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Account Page
+  const AccountPage = () => {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    
+    const handlePasswordChange = (e) => {
+      e.preventDefault();
+      alert('Password change functionality would be implemented here');
+    };
+    
+    return (
+      <div className="space-y-6">
+        <h2 className="text-3xl font-bold text-gray-800 border-b-2 border-yellow-400 pb-3">
+          My Account
+        </h2>
+        
+        {/* Account Details */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Account Details</h3>
+          <div className="space-y-3">
+            {[
+              { label: 'Dealership Name', value: dealershipName },
+              { label: 'Account ID', value: accountId },
+              { label: 'Contact Person', value: 'John Doe' },
+              { label: 'Email', value: 'john.doe@email.com' },
+              { label: 'Phone', value: '(123) 456-7890' },
+              { label: 'Address', value: '123 Main St, Anytown, USA 12345' },
+            ].map((item, idx) => (
+              <div key={idx} className="flex justify-between py-2 border-b border-gray-200 last:border-0">
+                <span className="font-semibold text-gray-700">{item.label}</span>
+                <span className="text-gray-600">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Change Password */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Change Password</h3>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2">Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">New Password</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2">Confirm New Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded transition-colors"
+            >
+              Change Password
+            </button>
+          </form>
+        </div>
+        
+        {/* Points History */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Points History</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-yellow-400">
+                  <th className="px-4 py-3 text-left text-gray-800">Date</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Description</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Points</th>
+                  <th className="px-4 py-3 text-left text-gray-800">Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseHistory.map((item, idx) => (
+                  <tr key={idx} className={idx % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="px-4 py-3 text-gray-700">{item.date}</td>
+                    <td className="px-4 py-3 text-gray-700">{item.description}</td>
+                    <td className={`px-4 py-3 font-semibold ${item.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {item.points > 0 ? '+' : ''}{item.points.toLocaleString()}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700">{item.balance.toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Main App
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <Navigation />
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        {currentPage === 'dashboard' && <DashboardPage />}
+        {currentPage === 'performance' && <PerformancePage />}
+        {currentPage === 'rewards' && <RewardsPage />}
+        {currentPage === 'account' && <AccountPage />}
+      </main>
+      
+      <footer className="bg-gray-800 text-white mt-12">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-yellow-400 font-semibold mb-3">Shell Dealer Rewards</h3>
+              <p className="text-gray-300 text-sm">
+                Rewarding exceptional service and sales performance for Shell dealerships nationwide.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-yellow-400 font-semibold mb-3">Contact Support</h4>
+              <p className="text-sm">Email: dealersupport@shell.com</p>
+              <p className="text-sm">Phone: 1-800-SHELL-DR (1-800-743-5537)</p>
+            </div>
+          </div>
+          <div className="mt-6 pt-6 border-t border-gray-700 text-sm text-gray-400">
+            <p>&copy; 2025 Shell Corporation. All rights reserved. Terms and conditions apply.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default ShellDealerRewardsApp;
