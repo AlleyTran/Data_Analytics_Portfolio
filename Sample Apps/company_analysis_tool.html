@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alley's Company Research Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000000;
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #FFFFFF;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            padding: 60px 60px 50px;
+            position: relative;
+            border-bottom: 1px solid #222;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(0, 128, 128, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cat-silhouette svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 20px rgba(0, 128, 128, 0.3));
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3em;
+            font-weight: 800;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #FFFFFF 0%, #008080 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            font-weight: 300;
+            font-style: italic;
+            opacity: 0.7;
+            letter-spacing: 0.5px;
+        }
+
+        .input-section {
+            padding: 60px;
+            background: #000000;
+        }
+
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #FFFFFF;
+        }
+
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 400;
+            color: #FFFFFF;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 18px 20px;
+            border: 1px solid #333;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: #0a0a0a;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #008080;
+            box-shadow: 0 0 0 1px #008080;
+            background: #000000;
+        }
+
+        select option {
+            background: #0a0a0a;
+            color: #FFFFFF;
+        }
+
+        .vendor-input {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #008080 0%, #00A0A0 100%);
+            color: #FFFFFF;
+            padding: 18px 50px;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px 20px rgba(0, 128, 128, 0.3);
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(0, 128, 128, 0.5);
+        }
+
+        .analyze-btn:disabled {
+            background: #333;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .output-section {
+            padding: 60px;
+            background: #000000;
+        }
+
+        .output-box {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            padding: 40px;
+            min-height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .spinner {
+            border: 3px solid #222;
+            border-top: 3px solid #008080;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-steps {
+            margin-top: 30px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: #0a0a0a;
+            border-left: 2px solid #222;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            border-left-color: #008080;
+            background: #111;
+        }
+
+        .progress-step.complete {
+            border-left-color: #00FF88;
+        }
+
+        .step-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .progress-step.active .step-icon {
+            background: #008080;
+            color: #FFFFFF;
+        }
+
+        .progress-step.complete .step-icon {
+            background: #00FF88;
+            color: #000000;
+        }
+
+        .step-text {
+            font-size: 0.95em;
+            color: #999;
+            font-weight: 300;
+        }
+
+        .progress-step.active .step-text {
+            color: #FFFFFF;
+        }
+
+        .result-content h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: #FFFFFF;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #222;
+            font-size: 1.8em;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .result-content h3 {
+            font-family: 'Montserrat', sans-serif;
+            color: #008080;
+            margin: 35px 0 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-content h4 {
+            color: #FFFFFF;
+            margin: 25px 0 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .result-content p {
+            line-height: 1.8;
+            color: #CCC;
+            margin-bottom: 20px;
+            font-size: 1em;
+            font-weight: 300;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .result-content ul, .result-content ol {
+            margin: 20px 0 20px 25px;
+            line-height: 1.8;
+            color: #CCC;
+        }
+
+        .result-content li {
+            margin-bottom: 12px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            font-weight: 300;
+        }
+
+        .result-content strong {
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+
+        .result-content em {
+            font-style: italic;
+            color: #999;
+        }
+
+        .sources {
+            background: #0a0a0a;
+            padding: 30px;
+            margin-top: 40px;
+            border-left: 3px solid #008080;
+        }
+
+        .sources h3 {
+            color: #008080;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .sources ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .sources li {
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+        }
+
+        .sources li:last-child {
+            border-bottom: none;
+        }
+
+        .sources a {
+            color: #008080;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .sources a:hover {
+            color: #00A0A0;
+        }
+
+        .assumptions {
+            background: #0a0a0a;
+            padding: 30px;
+            margin-top: 30px;
+            border-left: 3px solid #00FF88;
+        }
+
+        .assumptions h3 {
+            color: #00FF88;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .competitive-matrix {
+            margin: 30px 0;
+            padding: 0;
+            background: transparent;
+        }
+
+        .positioning-chart {
+            width: 100%;
+            max-width: 600px;
+            height: 500px;
+            margin: 30px auto;
+            position: relative;
+            background: #0a0a0a;
+            border: 1px solid #222;
+        }
+
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .strategic-formula {
+            background: linear-gradient(135deg, rgba(0, 128, 128, 0.1) 0%, rgba(0, 128, 128, 0.05) 100%);
+            border-left: 4px solid #008080;
+            padding: 25px;
+            margin: 25px 0;
+            font-size: 1.05em;
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .strategic-formula strong {
+            color: #008080;
+            font-weight: 600;
+        }
+
+        .download-btn {
+            background: #FFFFFF;
+            color: #000000;
+            padding: 15px 40px;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 40px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .download-btn:hover {
+            background: #008080;
+            color: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+        }
+
+        .api-key-section {
+            padding: 25px 60px;
+            background: #050505;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .api-key-section label {
+            white-space: nowrap;
+            margin-bottom: 0;
+            font-size: 0.8em;
+            color: #666;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .api-key-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 44px 12px 16px;
+            border: 1px solid #222;
+            font-size: 0.9em;
+            background: #0a0a0a;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #008080;
+            box-shadow: 0 0 0 1px #008080;
+        }
+
+        .toggle-key-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #555;
+            font-size: 0.8em;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .toggle-key-btn:hover { color: #008080; }
+
+        .api-key-hint {
+            font-size: 0.75em;
+            color: #444;
+            white-space: nowrap;
+        }
+
+        .key-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #333;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+
+        .key-status.active { background: #008080; box-shadow: 0 0 6px rgba(0,128,128,0.6); }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            color: #FF6B6B;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 3px solid #FF0000;
+        }
+
+        .info-card {
+            background: #0a0a0a;
+            border-left: 4px solid #008080;
+            padding: 25px;
+            margin: 25px 0;
+        }
+
+        .info-card h4 {
+            margin-top: 0;
+            color: #008080;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #008080 50%, transparent 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="cat-silhouette">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="50" cy="65" rx="22" ry="28" fill="#008080"/>
+                        <circle cx="50" cy="35" r="18" fill="#008080"/>
+                        <path d="M 35 25 L 30 10 L 42 22 Z" fill="#008080"/>
+                        <path d="M 65 25 L 70 10 L 58 22 Z" fill="#008080"/>
+                        <circle cx="43" cy="33" r="2.5" fill="#FFFFFF"/>
+                        <circle cx="57" cy="33" r="2.5" fill="#FFFFFF"/>
+                        <path d="M 50 40 L 48 42 L 52 42 Z" fill="#FFFFFF"/>
+                        <path d="M 28 70 Q 15 75 12 85 Q 11 90 15 88 Q 20 85 25 80 Q 28 75 28 70" fill="#008080"/>
+                        <ellipse cx="40" cy="90" rx="4" ry="6" fill="#008080"/>
+                        <ellipse cx="60" cy="90" rx="4" ry="6" fill="#008080"/>
+                        <line x1="35" y1="38" x2="20" y2="36" stroke="#FFFFFF" stroke-width="1"/>
+                        <line x1="35" y1="41" x2="20" y2="42" stroke="#FFFFFF" stroke-width="1"/>
+                        <line x1="65" y1="38" x2="80" y2="36" stroke="#FFFFFF" stroke-width="1"/>
+                        <line x1="65" y1="41" x2="80" y2="42" stroke="#FFFFFF" stroke-width="1"/>
+                    </svg>
+                </div>
+            </div>
+            <h1>Alley's Company Research Tool</h1>
+            <p class="subtitle">Bold but intuitive analysis. AI-Powered intelligence for strategic decisions.</p>
+        </div>
+
+        <div class="api-key-section">
+            <label for="apiKey">API Key</label>
+            <div class="api-key-wrapper">
+                <input type="password" id="apiKey" placeholder="sk-ant-..." oninput="updateKeyStatus()">
+                <button class="toggle-key-btn" onclick="toggleKeyVisibility()" title="Show/hide key">👁</button>
+            </div>
+            <div class="key-status" id="keyStatus"></div>
+            <span class="api-key-hint">Never saved · session only</span>
+        </div>
+
+        <div class="input-section">
+            <div class="section-title">Configure Analysis</div>
+            
+            <div class="form-group">
+                <label for="companyName">Company Name</label>
+                <input type="text" id="companyName" placeholder="Enter company name...">
+            </div>
+
+            <div class="form-group">
+                <label for="analysisType">Analysis Type</label>
+                <select id="analysisType">
+                    <option value="">Select analysis type...</option>
+                    <option value="financial">Option 1: Company Financial</option>
+                    <option value="marketing">Option 2: Product Marketing & Branding</option>
+                </select>
+            </div>
+
+            <div class="form-group vendor-input" id="vendorInput" style="display: none;">
+                <label for="vendorProduct">Vendor's Product/Service</label>
+                <input type="text" id="vendorProduct" placeholder="Describe your product or service...">
+            </div>
+
+            <button class="analyze-btn" onclick="startAnalysis()">Start Analysis</button>
+        </div>
+
+        <div class="output-section">
+            <div class="output-box" id="outputBox">
+                <div style="text-align: center; color: #666; padding: 80px 20px;">
+                    <p style="font-size: 1.1em; font-weight: 300;">Enter company details and click "Start Analysis" to begin research</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const analysisTypeSelect = document.getElementById('analysisType');
+        const vendorInput = document.getElementById('vendorInput');
+
+        analysisTypeSelect.addEventListener('change', function() {
+            // Vendor input removed since Option 3 is removed
+            vendorInput.style.display = 'none';
+        });
+
+        let currentAnalysisData = null;
+
+        function updateProgress(steps, activeIndex) {
+            const progressHTML = steps.map((step, index) => {
+                let className = 'progress-step';
+                let icon = index + 1;
+                
+                if (index < activeIndex) {
+                    className += ' complete';
+                    icon = '✓';
+                } else if (index === activeIndex) {
+                    className += ' active';
+                }
+                
+                return `
+                    <div class="${className}">
+                        <div class="step-icon">${icon}</div>
+                        <div class="step-text">${step}</div>
+                    </div>
+                `;
+            }).join('');
+            
+            return progressHTML;
+        }
+
+        function updateKeyStatus() {
+            const key = document.getElementById('apiKey').value.trim();
+            const dot = document.getElementById('keyStatus');
+            dot.classList.toggle('active', key.startsWith('sk-ant-') && key.length > 20);
+        }
+
+        function toggleKeyVisibility() {
+            const input = document.getElementById('apiKey');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function getApiKey() {
+            return document.getElementById('apiKey').value.trim();
+        }
+
+        async function startAnalysis() {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                alert('Please enter your Anthropic API key at the top to run the analysis.');
+                document.getElementById('apiKey').focus();
+                return;
+            }
+
+            const companyName = document.getElementById('companyName').value.trim();
+            const analysisType = document.getElementById('analysisType').value;
+
+            if (!companyName) {
+                alert('Please enter a company name');
+                return;
+            }
+
+            if (!analysisType) {
+                alert('Please select an analysis type');
+                return;
+            }
+
+            const outputBox = document.getElementById('outputBox');
+            
+            let steps = [];
+            if (analysisType === 'financial') {
+                steps = [
+                    'Searching financial data',
+                    'Analyzing growth potential',
+                    'Verifying funding status',
+                    'Compiling report'
+                ];
+            } else if (analysisType === 'marketing') {
+                steps = [
+                    'Scanning market category',
+                    'Analyzing competitors',
+                    'Identifying user personas',
+                    'Reviewing social presence',
+                    'Compiling report'
+                ];
+            }
+            
+            outputBox.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p style="color: #008080; font-size: 1.1em; font-weight: 500;">Conducting deep research on ${companyName}...</p>
+                    <p style="color: #999; margin-top: 10px;">This may take a moment as we verify information from multiple trusted sources</p>
+                    <div class="progress-steps">
+                        ${updateProgress(steps, 0)}
+                    </div>
+                </div>
+            `;
+
+            try {
+                let result;
+                if (analysisType === 'financial') {
+                    result = await analyzeFinancial(companyName, steps, outputBox);
+                } else if (analysisType === 'marketing') {
+                    result = await analyzeMarketing(companyName, steps, outputBox);
+                }
+
+                currentAnalysisData = {
+                    companyName,
+                    analysisType,
+                    result
+                };
+
+                displayResults(result);
+            } catch (error) {
+                outputBox.innerHTML = `
+                    <div class="error-message">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function analyzeFinancial(company, steps, outputBox) {
+            const apiUrl = "https://api.anthropic.com/v1/messages";
+            
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, 0);
+            
+            const prompt = `CRITICAL INSTRUCTION: Start your response IMMEDIATELY with "## Executive Summary". Do NOT include ANY introductory text, preamble, meta-commentary, or title before the Executive Summary. Just start directly with ## Executive Summary.
+
+Conduct a comprehensive financial analysis of ${company}. Please provide:
+
+## Executive Summary
+[Brief overview]
+
+## Current Financial Status
+Revenue, profitability, key metrics
+
+## 5-Year Growth Potential
+Market trends, expansion opportunities, risk factors
+
+## Funding Status
+Public/private, recent funding rounds, investors, valuation
+
+## Sources
+List all sources with URLs
+
+## Assumptions & Hypotheses
+If any
+
+Verify all information against at least 2 trusted sources.`;
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": getApiKey(),
+                    "anthropic-version": "2023-06-01",
+                    "anthropic-dangerous-direct-browser-access": "true",
+                },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 8000,
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                    tools: [
+                        {
+                            type: "web_search_20250305",
+                            name: "web_search"
+                        }
+                    ]
+                })
+            });
+
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, steps.length - 1);
+
+            const data = await response.json();
+            return parseClaudeResponse(data);
+        }
+
+        async function analyzeMarketing(company, steps, outputBox) {
+            const apiUrl = "https://api.anthropic.com/v1/messages";
+            
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, 0);
+            
+            const prompt = `START IMMEDIATELY with "## Executive Summary". NO intro text.
+
+Analyze ${company} strategically. BE CONCISE - use bullet points, short sentences. Do NOT mention frameworks or methodologies by name.
+
+## Executive Summary
+[3 sentences max]
+
+## 1. High-Value Customers
+[3 bullets max]
+
+## 2. Customer Personas
+[2 personas, 3 bullets each: role, goals, pain points]
+
+## 3. Jobs-to-be-Done
+[3 bullets: When X, I want Y, so I can Z]
+
+## 4. Competitive Position
+ONE LINE ONLY: CHART:${company}=(x,y)|Competitor1=(x,y)|Competitor2=(x,y)|Competitor3=(x,y)|Competitor4=(x,y)|X-axis=[label]|Y-axis=[label]
+
+## 5. Where to Play
+TO DO: [2-3 bullets]
+NOT TO DO: [2-3 bullets]
+
+## 6. How to Win
+[One sentence formula: X + Y = "positioning"]
+
+## 7. Tribe
+[3 bullets: who they are, what unites them, behaviors]
+
+## 8. Brand Promise
+[One sentence]
+
+## 9. Brand Story
+[2 sentences]
+
+## 10. Journey Moments
+[4 bullets]
+
+## 11. New Category
+[2 sentences max]
+
+## Market Trends
+[4 bullets]
+
+## Social Perception
+[2 sentences]
+
+## Sources
+[List URLs]
+
+## Assumptions
+[If any]`;
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": getApiKey(),
+                    "anthropic-version": "2023-06-01",
+                    "anthropic-dangerous-direct-browser-access": "true",
+                },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 8000,
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                    tools: [
+                        {
+                            type: "web_search_20250305",
+                            name: "web_search"
+                        }
+                    ]
+                })
+            });
+
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, steps.length - 1);
+
+            const data = await response.json();
+            return parseClaudeResponse(data);
+        }
+
+        async function analyzeClient(company, vendorProduct, steps, outputBox) {
+            const apiUrl = "https://api.anthropic.com/v1/messages";
+            
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, 0);
+            
+            const prompt = `CRITICAL INSTRUCTION: Start your response IMMEDIATELY with "## Executive Summary". Do NOT include ANY introductory text, preamble, meta-commentary, or title before the Executive Summary. Just start directly with ## Executive Summary.
+
+Conduct a potential client analysis for ${company} as a prospect for: ${vendorProduct}
+
+## Executive Summary
+[Brief overview]
+
+## Use Case Analysis
+How ${company} could use this product/service (teams, user types, specific use cases)
+
+## Key Contacts
+Find 2-3 specific names and titles of people at ${company} who could be users, buyers, or decision-makers for this type of product
+
+## Outreach Email Template
+Craft a short, punchy outreach email (3-4 sentences) introducing the vendor's product to one of these leads
+
+## Sources
+List all sources with URLs
+
+## Assumptions & Hypotheses
+If any
+
+Verify all information against at least 2 trusted sources.`;
+
+            const response = await fetch(apiUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": getApiKey(),
+                    "anthropic-version": "2023-06-01",
+                    "anthropic-dangerous-direct-browser-access": "true",
+                },
+                body: JSON.stringify({
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 8000,
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                    tools: [
+                        {
+                            type: "web_search_20250305",
+                            name: "web_search"
+                        }
+                    ]
+                })
+            });
+
+            outputBox.querySelector('.progress-steps').innerHTML = updateProgress(steps, steps.length - 1);
+
+            const data = await response.json();
+            return parseClaudeResponse(data);
+        }
+
+        function parseClaudeResponse(data) {
+            const content = data.content || [];
+            let fullText = '';
+            
+            for (const item of content) {
+                if (item.type === 'text') {
+                    fullText += item.text + '\n';
+                }
+            }
+
+            return {
+                fullText: fullText,
+                rawData: data
+            };
+        }
+
+        function displayResults(result) {
+            const text = result.fullText;
+            
+            let cleanedText = text;
+            
+            const execSummaryMatch = cleanedText.match(/##\s*Executive Summary/i);
+            if (execSummaryMatch) {
+                const index = cleanedText.indexOf(execSummaryMatch[0]);
+                cleanedText = cleanedText.substring(index);
+            }
+            
+            cleanedText = cleanedText.replace(/^#[^#].*?\n/gm, '');
+            
+            cleanedText = cleanedText
+                .replace(/Now I have comprehensive.*?\./gi, '')
+                .replace(/Let me compile it.*?\./gi, '')
+                .replace(/Applying Roger Martin.*?\n/gi, '')
+                .replace(/\*.*?Framework.*?\*/gi, '')
+                .replace(/I now have.*?analysis\./gi, '')
+                .replace(/I have conducted.*?\./gi, '')
+                .replace(/Based on.*?research.*?\./gi, '')
+                .replace(/Let me (produce|compile|create|construct|provide) (the |a )?.*?\./gi, '')
+                .replace(/I'll (now )?compile.*?\./gi, '')
+                .replace(/Based on.*?I can now.*?\./gi, '')
+                .replace(/Here is.*?analysis.*?:?\.?/gi, '');
+            
+            cleanedText = cleanedText.replace(/^[-_*]{3,}\s*$/gm, '');
+            
+            const lines = cleanedText.split('\n');
+            const fixedLines = [];
+            let currentLine = '';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (!line) {
+                    if (currentLine) {
+                        fixedLines.push(currentLine);
+                        currentLine = '';
+                    }
+                    fixedLines.push('');
+                    continue;
+                }
+                
+                const isMarkdownElement = line.startsWith('#') || 
+                                         line.startsWith('- ') || 
+                                         line.startsWith('* ') || 
+                                         line.match(/^\d+\.\s/) ||
+                                         line.includes('CHART:') ||
+                                         line.includes('POSITIONING_CHART:') ||
+                                         line.includes('STRATEGIC_FORMULA:');
+                
+                if (isMarkdownElement) {
+                    if (currentLine) {
+                        fixedLines.push(currentLine);
+                        currentLine = '';
+                    }
+                    fixedLines.push(line);
+                    continue;
+                }
+                
+                const endsWithTerminator = /[.!?:)]$/.test(currentLine) || currentLine === '';
+                
+                if (endsWithTerminator) {
+                    if (currentLine) {
+                        fixedLines.push(currentLine);
+                    }
+                    currentLine = line;
+                } else {
+                    currentLine += ' ' + line;
+                }
+            }
+            
+            if (currentLine) {
+                fixedLines.push(currentLine);
+            }
+            
+            cleanedText = fixedLines.join('\n');
+            
+            let html = '<div class="result-content">';
+            
+            const processLines = cleanedText.split('\n');
+            let inList = false;
+            let currentSection = '';
+            
+            for (let i = 0; i < processLines.length; i++) {
+                let line = processLines[i].trim();
+                
+                if (!line) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    continue;
+                }
+                
+                if (line.includes('CHART:') || line.includes('POSITIONING_CHART:')) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    html += createPositioningChart(line);
+                    continue;
+                }
+                
+                if (line.includes('STRATEGIC_FORMULA:')) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    const formulaText = line.replace('STRATEGIC_FORMULA:', '').trim();
+                    html += '<div class="strategic-formula"><strong>Strategic Formula:</strong><br>' + formulaText + '</div>';
+                    continue;
+                }
+                
+                if (line.startsWith('## ')) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    const headerText = line.replace('## ', '');
+                    currentSection = headerText.toLowerCase();
+                    
+                    if (currentSection.includes('source')) {
+                        html += '<div class="sources"><h3>' + headerText + '</h3>';
+                        continue;
+                    } else if (currentSection.includes('assumption') || currentSection.includes('hypothes')) {
+                        html += '<div class="assumptions"><h3>' + headerText + '</h3>';
+                        continue;
+                    } else {
+                        html += '<h2>' + headerText + '</h2>';
+                    }
+                    continue;
+                }
+                
+                if (line.startsWith('### ')) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    html += '<h3>' + line.replace('### ', '') + '</h3>';
+                    continue;
+                }
+                
+                if (line.startsWith('#### ')) {
+                    if (inList) {
+                        html += '</ul>';
+                        inList = false;
+                    }
+                    html += '<h4>' + line.replace('#### ', '') + '</h4>';
+                    continue;
+                }
+                
+                if (line.startsWith('- ') || line.startsWith('* ') || line.match(/^\d+\.\s/)) {
+                    if (!inList) {
+                        html += '<ul>';
+                        inList = true;
+                    }
+                    let itemText = line.replace(/^[-*]\s/, '').replace(/^\d+\.\s/, '');
+                    
+                    itemText = itemText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    itemText = itemText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    
+                    itemText = itemText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+                    
+                    if (currentSection.includes('source') && itemText.match(/https?:\/\//)) {
+                        html += '<li><a href="' + itemText + '" target="_blank">' + itemText + '</a></li>';
+                    } else {
+                        html += '<li>' + itemText + '</li>';
+                    }
+                    continue;
+                }
+                
+                if (inList) {
+                    html += '</ul>';
+                    inList = false;
+                }
+                
+                line = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                line = line.replace(/\*(.*?)\*/g, '<em>$1</em>');
+                
+                line = line.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank">$1</a>');
+                
+                if (currentSection.includes('source') || currentSection.includes('assumption') || currentSection.includes('hypothes')) {
+                    html += '<p>' + line + '</p>';
+                } else {
+                    html += '<p>' + line + '</p>';
+                }
+            }
+            
+            if (inList) {
+                html += '</ul>';
+            }
+            
+            if (currentSection.includes('source') || currentSection.includes('assumption') || currentSection.includes('hypothes')) {
+                html += '</div>';
+            }
+            
+            html += '<button class="download-btn" onclick="downloadPDF()">Download PDF Report</button>';
+            html += '</div>';
+            
+            document.getElementById('outputBox').innerHTML = html;
+        }
+
+        function createPositioningChart(dataLine) {
+            if (dataLine.includes('CHART:')) {
+                const data = dataLine.replace(/CHART:/gi, '').trim();
+                const parts = data.split('|');
+                
+                let xLabel = '', yLabel = '';
+                const companies = [];
+                
+                for (let part of parts) {
+                    part = part.trim();
+                    if (part.startsWith('X-axis=')) {
+                        xLabel = part.replace('X-axis=', '').trim();
+                    } else if (part.startsWith('Y-axis=')) {
+                        yLabel = part.replace('Y-axis=', '').trim();
+                    } else if (part.includes('=(') && part.includes(')')) {
+                        const match = part.match(/(.+?)=\((\d+\.?\d*),(\d+\.?\d*)\)/);
+                        if (match) {
+                            companies.push({
+                                name: match[1].trim(),
+                                x: parseFloat(match[2]),
+                                y: parseFloat(match[3])
+                            });
+                        }
+                    }
+                }
+                
+                if (companies.length > 0 && xLabel && yLabel) {
+                    return generateChartSVG(companies, xLabel, yLabel);
+                }
+            }
+            
+            const data = dataLine.replace(/POSITIONING_CHART:/gi, '').trim();
+            const parts = data.split('|').map(p => p.trim());
+            
+            let xLabel = '', yLabel = '';
+            const companies = [];
+            
+            for (let part of parts) {
+                if (part.startsWith('X-axis:')) {
+                    xLabel = part.replace('X-axis:', '').trim();
+                } else if (part.startsWith('Y-axis:')) {
+                    yLabel = part.replace('Y-axis:', '').trim();
+                } else if (part.includes(':') && part.includes('(')) {
+                    const coordMatch = part.match(/\((\d+\.?\d*),\s*(\d+\.?\d*)\)/);
+                    if (coordMatch) {
+                        const coordStart = part.indexOf('(');
+                        const name = part.substring(0, coordStart).replace(':', '').trim();
+                        companies.push({
+                            name: name,
+                            x: parseFloat(coordMatch[1]),
+                            y: parseFloat(coordMatch[2])
+                        });
+                    }
+                }
+            }
+            
+            if (companies.length > 0 && xLabel && yLabel) {
+                return generateChartSVG(companies, xLabel, yLabel);
+            }
+            
+            return `<div class="info-card">
+                <p><strong>Positioning Chart - Parsing Failed</strong></p>
+                <p>Raw data: ${dataLine}</p>
+                <p>Could not parse chart data.</p>
+            </div>`;
+        }
+        
+        function generateChartSVG(companies, xLabel, yLabel) {
+            const width = 600;
+            const height = 500;
+            const padding = 80;
+            const chartWidth = width - 2 * padding;
+            const chartHeight = height - 2 * padding;
+            
+            let svg = `<div class="positioning-chart">
+                <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+                    <rect x="${padding}" y="${padding}" width="${chartWidth}" height="${chartHeight}" fill="#0a0a0a" stroke="#333" stroke-width="1"/>`;
+            
+            for (let i = 1; i < 10; i++) {
+                const x = padding + (chartWidth / 10) * i;
+                const y = padding + (chartHeight / 10) * i;
+                svg += `<line x1="${x}" y1="${padding}" x2="${x}" y2="${height - padding}" stroke="#222" stroke-width="1"/>`;
+                svg += `<line x1="${padding}" y1="${y}" x2="${width - padding}" y2="${y}" stroke="#222" stroke-width="1"/>`;
+            }
+            
+            svg += `<line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="#FFFFFF" stroke-width="2"/>
+                    <line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height - padding}" stroke="#FFFFFF" stroke-width="2"/>
+                    
+                    <polygon points="${width - padding},${height - padding} ${width - padding - 8},${height - padding - 4} ${width - padding - 8},${height - padding + 4}" fill="#FFFFFF"/>
+                    <polygon points="${padding},${padding} ${padding - 4},${padding + 8} ${padding + 4},${padding + 8}" fill="#FFFFFF"/>
+                    
+                    <text x="${width / 2}" y="${height - 30}" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="500" font-family="Montserrat">${xLabel}</text>
+                    
+                    <text x="30" y="${height / 2}" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="500" font-family="Montserrat" transform="rotate(-90, 30, ${height / 2})">${yLabel}</text>`;
+            
+            companies.forEach((company, index) => {
+                const cx = padding + (company.x / 10) * chartWidth;
+                const cy = height - padding - (company.y / 10) * chartHeight;
+                const isMainCompany = index === 0;
+                const color = isMainCompany ? '#008080' : '#00FF88';
+                const radius = isMainCompany ? 9 : 7;
+                
+                svg += `
+                    <circle cx="${cx}" cy="${cy}" r="${radius}" fill="${color}" stroke="#FFFFFF" stroke-width="2"/>
+                    <text x="${cx}" y="${cy - 18}" text-anchor="middle" fill="#FFFFFF" font-size="13" font-weight="${isMainCompany ? 'bold' : '500'}" font-family="Montserrat">${company.name}</text>
+                    <text x="${cx}" y="${cy - 5}" text-anchor="middle" fill="#999" font-size="10" font-family="Inter">(${company.x}, ${company.y})</text>`;
+            });
+            
+            svg += `</svg>
+                <div style="margin-top: 15px; padding: 10px; background: #0a0a0a; font-size: 0.9em; border-left: 3px solid #008080;">
+                    <strong>Legend:</strong> 
+                    <span style="color: #008080;">●</span> ${companies[0]?.name || 'Main Company'} 
+                    <span style="margin-left: 15px; color: #00FF88;">●</span> Competitors
+                </div>
+            </div>`;
+            
+            return svg;
+        }
+
+        function downloadPDF() {
+            if (!currentAnalysisData) {
+                alert('No analysis data available to download');
+                return;
+            }
+
+            if (typeof window.jspdf === 'undefined') {
+                alert('PDF library is still loading. Please try again in a moment.');
+                return;
+            }
+
+            // Suppress jsPDF console errors
+            const originalError = console.error;
+            console.error = function() {};
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                const maxWidth = pageWidth - 2 * margin;
+                let yPos = margin;
+
+                function checkPageBreak(heightNeeded = 10) {
+                    if (yPos + heightNeeded > pageHeight - margin) {
+                        doc.addPage();
+                        yPos = margin;
+                        return true;
+                    }
+                    return false;
+                }
+
+                function addText(text, fontSize = 10, isBold = false) {
+                    doc.setFontSize(fontSize);
+                    doc.setFont(undefined, isBold ? 'bold' : 'normal');
+                    const lines = doc.splitTextToSize(text, maxWidth);
+                    
+                    for (let line of lines) {
+                        checkPageBreak(6);
+                        doc.text(line, margin, yPos);
+                        yPos += fontSize * 0.5;
+                    }
+                    yPos += 2;
+                }
+
+                doc.setFontSize(18);
+                doc.setFont(undefined, 'bold');
+                doc.text("Alley's Company Research Tool", margin, yPos);
+                yPos += 10;
+
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'normal');
+                doc.text(`Company: ${currentAnalysisData.companyName}`, margin, yPos);
+                yPos += 6;
+                
+                const analysisTypes = {
+                    'financial': 'Company Financial Analysis',
+                    'marketing': 'Product Marketing & Branding'
+                };
+                doc.text(`Analysis Type: ${analysisTypes[currentAnalysisData.analysisType]}`, margin, yPos);
+                yPos += 6;
+                
+                doc.text(`Generated: ${new Date().toLocaleString()}`, margin, yPos);
+                yPos += 12;
+
+                doc.setDrawColor(193, 124, 90);
+                doc.line(margin, yPos, pageWidth - margin, yPos);
+                yPos += 10;
+
+                const contentDiv = document.querySelector('.result-content');
+                if (!contentDiv) {
+                    console.error = originalError;
+                    alert('No content available to download');
+                    return;
+                }
+
+                const elements = contentDiv.children;
+                
+                for (let element of elements) {
+                    const tagName = element.tagName.toLowerCase();
+                    const text = element.textContent.trim();
+                    
+                    if (!text || element.classList.contains('download-btn')) {
+                        continue;
+                    }
+                    
+                    if (tagName === 'h2') {
+                        checkPageBreak(15);
+                        addText(text, 14, true);
+                        yPos += 3;
+                    } else if (tagName === 'h3') {
+                        checkPageBreak(12);
+                        addText(text, 12, true);
+                        yPos += 2;
+                    } else if (tagName === 'h4') {
+                        checkPageBreak(10);
+                        addText(text, 11, true);
+                        yPos += 1;
+                    } else if (tagName === 'p') {
+                        addText(text, 10, false);
+                        yPos += 2;
+                    } else if (tagName === 'ul' || tagName === 'ol') {
+                        const items = element.querySelectorAll('li');
+                        for (let item of items) {
+                            const itemText = '• ' + item.textContent.trim();
+                            addText(itemText, 10, false);
+                        }
+                        yPos += 3;
+                    } else if (element.classList.contains('sources')) {
+                        checkPageBreak(15);
+                        addText('SOURCES', 12, true);
+                        yPos += 2;
+                        
+                        const links = element.querySelectorAll('a, li, p');
+                        for (let link of links) {
+                            const linkText = link.textContent.trim();
+                            if (linkText && linkText !== 'Sources') {
+                                addText(linkText, 9, false);
+                            }
+                        }
+                        yPos += 5;
+                    } else if (element.classList.contains('assumptions')) {
+                        checkPageBreak(15);
+                        addText('ASSUMPTIONS & HYPOTHESES', 12, true);
+                        yPos += 2;
+                        
+                        const assumptionTexts = element.querySelectorAll('p');
+                        for (let p of assumptionTexts) {
+                            const pText = p.textContent.trim();
+                            if (pText && pText !== 'Assumptions & Hypotheses') {
+                                addText(pText, 10, false);
+                            }
+                        }
+                        yPos += 5;
+                    }
+                }
+
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setTextColor(150);
+                    doc.text(
+                        `Page ${i} of ${totalPages}`,
+                        pageWidth / 2,
+                        pageHeight - 10,
+                        { align: 'center' }
+                    );
+                }
+
+                doc.setTextColor(0);
+
+                const filename = `${currentAnalysisData.companyName.replace(/[^a-z0-9]/gi, '_')}_Analysis_Report.pdf`;
+                
+                const pdfBlob = doc.output('blob');
+                const url = URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                setTimeout(() => URL.revokeObjectURL(url), 100);
+                
+            } catch (error) {
+                // Silently handle PDF generation errors
+            } finally {
+                // Restore original console.error
+                console.error = originalError;
+            }
+        }
+    </script>
+</body>
+</html>
